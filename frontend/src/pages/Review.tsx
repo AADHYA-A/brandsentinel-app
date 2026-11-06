@@ -51,16 +51,26 @@ export default function Review({ ctx }: { ctx: Ctx }) {
   const apply = async (p: Promise<Doc>) => { const d = await p; ctx.setDoc(d); await ctx.reload(); return d; };
 
   if (!doc) {
+    const prepared = ctx.docs.filter(d => d.title.startsWith("[Lumora] "));
     return (
       <Pane>
         <h2 className="text-[22px] mb-1">Review a draft</h2>
         {user.role === "Creator" ? (
           <>
-            <Muted>Start a blank draft, load the sample, or upload a .txt, .md, .html, .docx, .pdf or image file. In the editor, add a title and your content, then select Run review. Check each finding against its cited approved source and accept, edit, or dispute it before submitting for approval.</Muted>
+            <Muted>Open one of your prepared drafts below, or start a new one. Review findings against their cited sources before submitting for approval.</Muted>
             <div className="flex flex-wrap gap-2 mt-3">
               <Btn v="g" onClick={() => run(() => apply(api.createDoc({ title: "Untitled draft", text: "", team: user.team })))}>New draft</Btn>
               <Btn v="s" onClick={() => run(() => apply(api.createDoc({ title: "Sample launch post", text: SAMPLE, team: user.team })))}>Load sample draft</Btn>
             </div>
+            <h3 className="text-[18px] mt-6">Prepared Lumora drafts <span className="text-sm text-mut font-sans">{prepared.length}</span></h3>
+            <Muted>These drafts are already saved in your workspace. Select one to inspect or revise it.</Muted>
+            {prepared.length > 0 ? <div className="grid gap-2 mt-3 sm:grid-cols-2">
+              {prepared.map(d => <div key={d.id} className="border border-ln rounded-xl p-3 flex flex-col items-start gap-2">
+                <b>{d.title.replace("[Lumora] ", "")}</b>
+                <StatusPill status={d.status} label={d.status_label} />
+                <Btn v="s" className="mt-auto" onClick={() => void ctx.open(d.id, "review")}>Open draft</Btn>
+              </div>)}
+            </div> : <Muted>Your saved drafts will appear here.</Muted>}
             <details className="mt-3">
               <summary className="cursor-pointer font-semibold">Browse more writing examples</summary>
               <Muted>Choose a sample to create a draft in your workspace. It will not be submitted until you run the review and send it for approval.</Muted>
