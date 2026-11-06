@@ -47,6 +47,12 @@ def seed_workflow_examples(db: Session, tenant_id: str) -> None:
         ("[Demo Workflow] Monthly studio newsletter", "This month at Lumora Wellness: new class times, instructor introductions, and community events.", "changes_requested"),
         ("[Demo Workflow] Class schedule announcement", "The updated class schedule is available. Members can review session times in the Lumora app.", "approved"),
         ("[Demo Workflow] Community event invitation", "Join us for a community wellness afternoon with guided movement and time to connect.", "published"),
+        ("[Demo Workflow] New member onboarding", "Start with a short introduction to Lumora Wellness, our class options, and how members can plan their first visit.", "draft"),
+        ("[Demo Workflow] Instructor spotlight", "Meet the instructors leading this month's movement and mindfulness sessions at Lumora Wellness.", "draft"),
+        ("[Demo Workflow] App feature update", "The Lumora app now brings class times, saved sessions, and member updates together in one place.", "pending_manager"),
+        ("[Demo Workflow] Weekend open house", "Visit the Lumora studio this weekend to meet the team and learn about the community class schedule.", "changes_requested"),
+        ("[Demo Workflow] Mindful movement guide", "A simple guide to preparing for a mindful movement session, from comfortable clothing to taking breaks when needed.", "approved"),
+        ("[Demo Workflow] Seasonal class reminder", "Explore this season's class calendar and choose sessions that fit your routine.", "published"),
     ]
     for title, body, target in examples:
         if title in existing:
@@ -61,6 +67,8 @@ def seed_workflow_examples(db: Session, tenant_id: str) -> None:
                 svc.decide(db, aria, doc, finding.id, "accept")
             else:
                 svc.decide(db, aria, doc, finding.id, "dispute", reason="Demo example: reviewed against the approved brand source.")
+        if target == "draft":
+            continue
         svc.submit(db, aria, doc)
         if doc.status == "pending_reviewer":
             leela = db.execute(select(User).where(User.email == "leela@lumora.demo")).scalars().first()
