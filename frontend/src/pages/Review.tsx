@@ -144,7 +144,8 @@ export default function Review({ ctx }: { ctx: Ctx }) {
           <label className="text-sm text-mut">Show <select value={filter} onChange={e => setFilter(e.target.value as any)} className="bg-bg border border-ln rounded px-1.5 py-1 text-ink">
             <option value="all">all</option><option value="open">open</option><option value="high">high-risk</option></select></label>
         </div>
-        {!doc.run && <Muted>Choose “Run review”. Every finding will cite an approved source.</Muted>}
+        <Muted>Each finding shows the passage, why it was flagged, its approved source, and a suggested fix. Accept the fix, edit it, or dispute it with a reason. Resolve findings before continuing to approval.</Muted>
+        {!doc.run && <Muted>Choose “Run review” to check this draft. Every finding will cite an approved source.</Muted>}
         {doc.run && !fresh && <p className="bg-mdb text-md rounded p-2 my-2">{dirty ? "You have edited the draft. " : ""}Run the review again to see findings for the current text.</p>}
         {doc.run && fresh && (
           <>
