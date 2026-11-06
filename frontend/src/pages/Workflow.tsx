@@ -21,10 +21,22 @@ export default function Workflow({ ctx }: { ctx: Ctx }) {
   useEffect(() => { if (doc) api.docAudit(doc.id).then(setTrail).catch(() => {}); }, [doc?.id, doc?.status, doc?.comments.length]);  // eslint-disable-line
   useEffect(() => { setOps(null); setNote(""); setA(1); setB("working"); }, [doc?.id]);
 
-  if (!doc) return <Pane>
-    <h2 className="text-[22px] mb-1">Approval and history</h2>
-    <Muted>Select a document from Documents to see its current approval status, comments, revision history, and audit trail.</Muted>
-  </Pane>;
+  if (!doc) {
+    const examples = ctx.docs.filter(d => d.title.startsWith("[Demo Workflow] "));
+    return <Pane>
+      <h2 className="text-[22px] mb-1">Approval and history</h2>
+      <Muted>Select a document to see its approval status, comments, revision history, and audit trail.</Muted>
+      <h3 className="text-[17px] mt-5">Demo workflow examples</h3>
+      <Muted>Sample Lumora drafts show records at different approval stages. Open one to inspect its decisions and history.</Muted>
+      {!examples.length && <Muted>Demo workflow examples will appear here when demo data is enabled.</Muted>}
+      <div className="grid gap-2 mt-3">
+        {examples.map(d => <div key={d.id} className="border border-ln rounded-md p-3 flex flex-wrap items-center justify-between gap-3">
+          <div><b>{d.title.replace("[Demo Workflow] ", "")}</b><div className="mt-1"><StatusPill status={d.status} label={d.status_label} /></div></div>
+          <Btn v="s" onClick={() => void ctx.open(d.id, "flow")}>Open approval history</Btn>
+        </div>)}
+      </div>
+    </Pane>;
+  }
   const act = async (action: string, n = "", ok = "") => {
     setBusy(true);
     try { const d: Doc = await api.act(doc.id, action, n); ctx.setDoc(d); await ctx.reload(); setNote(""); setCm(""); if (ok) toast(ok); }
