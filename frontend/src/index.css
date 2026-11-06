@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root{--bg:#f6f7f9;--sf:#fff;--ink:#14213d;--mut:#5a6577;--ln:#d9dee7;--ac:#0f766e;--acb:#d7f0ec;--hi:#b42318;--hib:#fde4e1;--md:#8a5a00;--mdb:#fdf0cf;--lo:#355fa8;--lob:#e3ecfb;--cv:#6b3fa0;--cvb:#eee4fa;--ok:#116b3b;--okb:#dcf3e5}
+@media (prefers-color-scheme:dark){:root{--bg:#0e1420;--sf:#17202f;--ink:#e8ecf4;--mut:#9aa6ba;--ln:#2b3750;--ac:#4cc3b5;--acb:#12403c;--hi:#ff8f84;--hib:#4a1d19;--md:#f2c560;--mdb:#43330a;--lo:#8fb2f0;--lob:#1c2d4e;--cv:#c4a2f0;--cvb:#34214d;--ok:#6fd49a;--okb:#143a26}}
+
+@theme inline {
+  --color-bg: var(--bg); --color-sf: var(--sf); --color-ink: var(--ink); --color-mut: var(--mut); --color-ln: var(--ln);
+  --color-ac: var(--ac); --color-acb: var(--acb); --color-hi: var(--hi); --color-hib: var(--hib); --color-md: var(--md); --color-mdb: var(--mdb);
+  --color-lo: var(--lo); --color-lob: var(--lob); --color-cv: var(--cv); --color-cvb: var(--cvb); --color-ok: var(--ok); --color-okb: var(--okb);
+  --font-serif: Newsreader, Georgia, serif; --font-sans: "Instrument Sans", system-ui, sans-serif;
+}
+
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "Instrument Sans", system-ui, sans-serif; }
+h1, h2, h3 { font-family: Newsreader, Georgia, serif; margin: 0; }
+:focus-visible { outline: 3px solid var(--ac); outline-offset: 2px; }
+mark { cursor: pointer; color: inherit; border-radius: 3px; padding: 0 2px; }
+.mono { font: 13.5px/1.7 ui-monospace, Menlo, Consolas, monospace; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--ln); vertical-align: top; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }

@@ -1,0 +1,20 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment: { POSTGRES_USER: brand, POSTGRES_PASSWORD: brand, POSTGRES_DB: brandsentinel }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U brand"], interval: 5s, retries: 10 }
+  app:
+    build: .
+    depends_on: { db: { condition: service_healthy } }
+    ports: ["8000:8000"]
+    environment:
+      BS_DATABASE_URL: postgresql://brand:brand@db:5432/brandsentinel
+      BS_SECRET_KEY: ${BS_SECRET_KEY:-change-me-change-me-change-me-1234}
+      BS_ENCRYPTION_KEY: ${BS_ENCRYPTION_KEY:-}     # generate: python -c "from cryptography.fernet import Fernet;print(Fernet.generate_key().decode())"
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}      # optional; without it every check is rule-based
+      BS_TENANT_LOCAL_ONLY: ${BS_TENANT_LOCAL_ONLY:-false}
+      # BS_OIDC_ISSUER: https://your-idp   BS_OIDC_AUDIENCE: brandsentinel   (turns off password login)
+      # BS_S3_BUCKET: my-bucket            BS_S3_ENDPOINT: https://minio:9000
+    volumes: [appdata:/srv/data]
+volumes: { pgdata: {}, appdata: {} }
