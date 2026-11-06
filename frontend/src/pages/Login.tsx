@@ -20,16 +20,25 @@ export default function Login({ onLogin }: { onLogin: (u: User) => void }) {
       <Muted>Pre-publication brand governance. Every finding cites an approved source; humans make every decision.</Muted>
       <Pane className="mt-6">
         <h2 className="text-xl mb-2">Sign in</h2>
+        <Muted>Enter the email address and password for your workspace account. For a demo, use the one-click Aria sign-in below.</Muted>
         <form onSubmit={e => { e.preventDefault(); go(email, pw); }} className="grid gap-3">
-          <label>Email<Input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="username" required /></label>
-          <label>Password<Input type="password" value={pw} onChange={e => setPw(e.target.value)} autoComplete="current-password" required /></label>
+          <label className="grid gap-1">
+            <span>Email address</span>
+            <Input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="username" placeholder="name@company.com" required />
+            <span className="text-xs text-mut">Use the email registered to your workspace.</span>
+          </label>
+          <label className="grid gap-1">
+            <span>Password</span>
+            <Input type="password" value={pw} onChange={e => setPw(e.target.value)} autoComplete="current-password" placeholder="Enter your account password" required />
+            <span className="text-xs text-mut">Use the password associated with that account.</span>
+          </label>
           {err && <p role="alert" className="text-hi">{err}</p>}
           <Btn v="g" type="submit">Sign in</Btn>
         </form>
       </Pane>
       <Pane className="mt-4">
         <h2 className="text-xl mb-1">Demo workspace</h2>
-        <Muted>Fill Aria’s demo credentials and sign in with one click.</Muted>
+        <Muted>Demo email: <code>{DEMO_EMAIL}</code> · Password: <code>{DEMO_PASSWORD}</code>. Click below to fill them in and sign in.</Muted>
         <button
           type="button"
           onClick={() => {
