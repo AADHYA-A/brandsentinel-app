@@ -42,7 +42,7 @@ export default function Review({ ctx }: { ctx: Ctx }) {
         <h2 className="text-[22px] mb-1">Review a draft</h2>
         {user.role === "Creator" ? (
           <>
-            <Muted>Start a new draft, try the sample, or upload a .txt, .md, .html, .docx, .pdf or image file.</Muted>
+            <Muted>Choose New draft to name a blank draft and paste in the copy you want checked. Load the sample to explore the review, or upload a .txt, .md, .html, .docx, .pdf or image file. Then run the review to see findings and their approved sources.</Muted>
             <div className="flex flex-wrap gap-2 mt-3">
               <Btn v="g" onClick={() => run(() => apply(api.createDoc({ title: "Untitled draft", text: "", team: user.team })))}>New draft</Btn>
               <Btn v="s" onClick={() => run(() => apply(api.createDoc({ title: "Sample launch post", text: SAMPLE, team: user.team })))}>Load sample draft</Btn>
@@ -90,6 +90,7 @@ export default function Review({ ctx }: { ctx: Ctx }) {
         </div>
         <label className="block text-mut text-sm" htmlFor="title">Title</label>
         <Input id="title" value={title} onChange={e => setTitle(e.target.value)} onBlur={() => canEditText && title !== doc.title && api.saveText(doc.id, text, title).then(d => { ctx.setDoc(d); ctx.reload(); })} disabled={!editable} />
+        {editable && <p className="text-mut text-xs mt-1">Add a short name that helps reviewers identify this draft or campaign.</p>}
         {doc.source_type === "image" ? (
           <div className="mt-3">
             {imgUrl ? <img src={imgUrl} alt={doc.alt_text || "Uploaded image under review (no alt text supplied)"} className="max-h-64 rounded border border-ln" /> : <Muted>Loading image…</Muted>}
@@ -100,6 +101,7 @@ export default function Review({ ctx }: { ctx: Ctx }) {
         ) : (
           <>
             <label className="block text-mut text-sm mt-3" htmlFor="draft">Text or HTML to review before publication</label>
+            {editable && <p className="text-mut text-xs mb-1">Paste the exact copy you plan to publish. Edits save automatically; select Run review to check the current version.</p>}
             <textarea id="draft" className="mono w-full min-h-[230px] bg-bg border border-ln rounded-md p-2.5 resize-y" value={text} readOnly={!canEditText}
               onChange={e => onText(e.target.value)} placeholder="Paste your draft here" />
           </>

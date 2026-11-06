@@ -21,7 +21,10 @@ export default function Workflow({ ctx }: { ctx: Ctx }) {
   useEffect(() => { if (doc) api.docAudit(doc.id).then(setTrail).catch(() => {}); }, [doc?.id, doc?.status, doc?.comments.length]);  // eslint-disable-line
   useEffect(() => { setOps(null); setNote(""); setA(1); setB("working"); }, [doc?.id]);
 
-  if (!doc) return <Pane><Muted>Open a document from the Documents tab first.</Muted></Pane>;
+  if (!doc) return <Pane>
+    <h2 className="text-[22px] mb-1">Approval and history</h2>
+    <Muted>Select a document from Documents to see its current approval status, comments, revision history, and audit trail.</Muted>
+  </Pane>;
   const act = async (action: string, n = "", ok = "") => {
     setBusy(true);
     try { const d: Doc = await api.act(doc.id, action, n); ctx.setDoc(d); await ctx.reload(); setNote(""); setCm(""); if (ok) toast(ok); }
@@ -37,6 +40,7 @@ export default function Workflow({ ctx }: { ctx: Ctx }) {
     <div className="grid gap-5 lg:grid-cols-2">
       <Pane>
         <h2 className="text-[22px] mb-1">Approval workflow</h2>
+        <Muted>Creators run a review, decide on each finding, then submit. An Authorised Reviewer checks high-risk claims before the Brand Manager approves or requests changes. Comments, revisions, and the audit trail show what happened at each step.</Muted>
         <p className="font-semibold">{doc.title}</p>
         <div className="flex items-center gap-2 my-1"><StatusPill status={doc.status} label={doc.status_label} /><span className="text-mut">Version {doc.version}</span></div>
         <ol className="flex flex-wrap gap-1.5 my-3 list-none p-0" aria-label="Workflow steps">
