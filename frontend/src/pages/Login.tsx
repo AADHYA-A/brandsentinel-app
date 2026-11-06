@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { api, setToken } from "../api";
 import type { User } from "../types";
 import { Btn, Input, Muted, Pane, errMsg } from "../ui";
 
+const DEMO_EMAIL = "aria@lumora.demo";
+const DEMO_PASSWORD = "demo123";
+
 export default function Login({ onLogin }: { onLogin: (u: User) => void }) {
-  const [demo, setDemo] = useState<User[]>([]);
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
-  useEffect(() => { api.demoUsers().then(setDemo).catch(() => {}); }, []);
   const go = async (e: string, p: string) => {
     setErr("");
     try { const r = await api.login(e, p); setToken(r.token); onLogin(r.user); } catch (x) { setErr(errMsg(x)); }
@@ -26,19 +27,21 @@ export default function Login({ onLogin }: { onLogin: (u: User) => void }) {
           <Btn v="g" type="submit">Sign in</Btn>
         </form>
       </Pane>
-      {demo.length > 0 && (
-        <Pane className="mt-4">
-          <h2 className="text-xl mb-1">Demo workspace</h2>
-          <Muted>Try each role. Aria drafts, Leela is the Authorised Reviewer, Meera approves, Ishaan manages the brand kit.</Muted>
-          <div className="grid gap-2 mt-2">
-            {demo.map(u => (
-              <button key={u.id} onClick={() => go(u.email, u.password || "")} className="text-left border border-ln rounded-md px-3 py-2 cursor-pointer">
-                <b>{u.name}</b> <span className="text-mut">· {u.role} · {u.team}</span>
-              </button>
-            ))}
-          </div>
-        </Pane>
-      )}
+      <Pane className="mt-4">
+        <h2 className="text-xl mb-1">Demo workspace</h2>
+        <Muted>Fill Aria’s demo credentials and sign in with one click.</Muted>
+        <button
+          type="button"
+          onClick={() => {
+            setEmail(DEMO_EMAIL);
+            setPw(DEMO_PASSWORD);
+            void go(DEMO_EMAIL, DEMO_PASSWORD);
+          }}
+          className="w-full mt-3 text-left border border-ln rounded-md px-3 py-2 cursor-pointer"
+        >
+          <b>Sign in as Aria</b> <span className="text-mut">· Creator · Demo workspace</span>
+        </button>
+      </Pane>
     </main>
   );
 }
