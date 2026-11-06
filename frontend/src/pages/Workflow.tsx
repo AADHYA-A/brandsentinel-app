@@ -40,7 +40,7 @@ export default function Workflow({ ctx }: { ctx: Ctx }) {
     <div className="grid gap-5 lg:grid-cols-2">
       <Pane>
         <h2 className="text-[22px] mb-1">Approval workflow</h2>
-        <Muted>Creators run a review, decide on each finding, then submit. An Authorised Reviewer checks high-risk claims before the Brand Manager approves or requests changes. Comments, revisions, and the audit trail show what happened at each step.</Muted>
+        <Muted>Creators run a review, resolve each finding, then submit. High-risk claims go to an Authorised Reviewer before the Brand Manager; other drafts go to the Brand Manager. Add a note when requesting changes. Comments, saved versions, and the audit trail record the decisions and edits.</Muted>
         <p className="font-semibold">{doc.title}</p>
         <div className="flex items-center gap-2 my-1"><StatusPill status={doc.status} label={doc.status_label} /><span className="text-mut">Version {doc.version}</span></div>
         <ol className="flex flex-wrap gap-1.5 my-3 list-none p-0" aria-label="Workflow steps">
@@ -101,6 +101,7 @@ export default function Workflow({ ctx }: { ctx: Ctx }) {
 
       <Pane>
         <h2 className="text-[22px] mb-1">Revision history</h2>
+        <Muted>Use Compare versions to see what changed between a saved version and the current draft. The audit trail below records who took each action and when.</Muted>
         {!doc.versions.length && <Muted>Submit a draft to create version 1.</Muted>}
         {doc.versions.map(v => (
           <div key={v.version} className="border border-ln rounded-md p-2.5 mt-2">

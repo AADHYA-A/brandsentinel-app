@@ -42,7 +42,7 @@ export default function Review({ ctx }: { ctx: Ctx }) {
         <h2 className="text-[22px] mb-1">Review a draft</h2>
         {user.role === "Creator" ? (
           <>
-            <Muted>Choose New draft to name a blank draft and paste in the copy you want checked. Load the sample to explore the review, or upload a .txt, .md, .html, .docx, .pdf or image file. Then run the review to see findings and their approved sources.</Muted>
+            <Muted>Start a blank draft, load the sample, or upload a .txt, .md, .html, .docx, .pdf or image file. In the editor, add a title and your content, then select Run review. Check each finding against its cited approved source and accept, edit, or dispute it before submitting for approval.</Muted>
             <div className="flex flex-wrap gap-2 mt-3">
               <Btn v="g" onClick={() => run(() => apply(api.createDoc({ title: "Untitled draft", text: "", team: user.team })))}>New draft</Btn>
               <Btn v="s" onClick={() => run(() => apply(api.createDoc({ title: "Sample launch post", text: SAMPLE, team: user.team })))}>Load sample draft</Btn>
