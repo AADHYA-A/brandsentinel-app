@@ -9,7 +9,7 @@ export const SAMPLE = `Hi everyone! Our Customers LOVE Lumora!! Over 10,000 clie
 <img src="hero.png"> <a href="/join">click here</a>
 Banner text: #9aa0a6 on #ffffff`;
 
-const EXTRA_DEMO_DRAFTS = [
+const EXTRA_SAMPLE_DRAFTS = [
   { title: "Wellness week social caption", text: "Join Lumora for Wellness Week! We’re the best in the industry, and our classes guarantee a calmer you. Sign up today." },
   { title: "Pro plan price announcement", text: "A better routine starts here. The Pro plan is now only ₹1,299 per month. Join today for the same trusted Lumora experience." },
   { title: "Member welcome email", text: "Welcome to Lumora. Your membership is ready. Explore the class schedule, choose a session that suits you, and reach out if you need help getting started." },
@@ -62,10 +62,10 @@ export default function Review({ ctx }: { ctx: Ctx }) {
               <Btn v="s" onClick={() => run(() => apply(api.createDoc({ title: "Sample launch post", text: SAMPLE, team: user.team })))}>Load sample draft</Btn>
             </div>
             <details className="mt-3">
-              <summary className="cursor-pointer font-semibold">Browse 11 more demo drafts</summary>
+              <summary className="cursor-pointer font-semibold">Browse more writing examples</summary>
               <Muted>Choose a sample to create a draft in your workspace. It will not be submitted until you run the review and send it for approval.</Muted>
               <div className="grid gap-2 mt-2 sm:grid-cols-2">
-                {EXTRA_DEMO_DRAFTS.map(sample => (
+                {EXTRA_SAMPLE_DRAFTS.map(sample => (
                   <div key={sample.title} className="border border-ln rounded-md p-3">
                     <b>{sample.title}</b>
                     <p className="text-sm text-mut my-1">{sample.text}</p>

@@ -51,23 +51,26 @@ function Shell() {
   return (
     <>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-sf focus:p-2">Skip to content</a>
-      <header className="flex flex-wrap gap-3 items-center justify-between px-5 py-3.5 border-b-2 border-ink bg-sf">
-        <div>
-          <h1 className="text-[26px] font-bold">BrandSentinel</h1>
-          <small className="block text-mut text-xs">No source, no finding. Humans decide. Workspace: Lumora Wellness</small>
+      <header className="brand-header flex flex-wrap gap-3 items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-3">
+          <span className="brand-mark" aria-hidden="true">B</span>
+          <div>
+            <h1 className="text-[26px] font-bold">BrandSentinel</h1>
+            <small className="block text-mut text-xs">Evidence-led brand review · Lumora Wellness</small>
+          </div>
         </div>
         <div className="flex items-center gap-3 text-sm">
           <span><b>{user.name}</b> <span className="text-mut">· {user.role}</span></span>
           <button onClick={logout} className="border border-ln rounded-md px-3 py-1.5 cursor-pointer">Sign out</button>
         </div>
       </header>
-      <nav role="tablist" aria-label="Sections" className="flex gap-1 px-5 bg-sf border-b border-ln overflow-x-auto">
+      <nav role="tablist" aria-label="Sections" className="app-nav flex gap-1 px-5 overflow-x-auto">
         {tabs.map(([k, l]) => (
           <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-            className={`px-3 py-2.5 whitespace-nowrap cursor-pointer border-b-[3px] ${tab === k ? "border-ac font-semibold text-ink" : "border-transparent text-mut"}`}>{l}</button>
+            className={`px-3 py-2.5 whitespace-nowrap cursor-pointer ${tab === k ? "font-semibold text-ink" : "text-mut"}`}>{l}</button>
         ))}
       </nav>
-      <main id="main" className="max-w-[1180px] mx-auto px-5 pt-4 pb-16">{page}</main>
+      <main id="main" className="app-main max-w-[1280px] mx-auto px-5 pt-6 pb-16">{page}</main>
     </>
   );
 }

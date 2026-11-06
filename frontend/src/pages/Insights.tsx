@@ -18,7 +18,7 @@ export default function Insights({ ctx }: { ctx: Ctx }) {
     <div className="grid gap-4">
       <Pane>
         <div className="flex flex-wrap items-center gap-2"><h2 className="text-[22px] mr-auto">Governance insights</h2>
-          {ctx.user.role === "Brand Admin" && d.decisions === 0 && <Btn v="s" onClick={async () => { try { await api.demoActivity(); await load(); toast("Demo activity added."); } catch (e) { toast(errMsg(e), true); } }}>Add demo activity</Btn>}</div>
+          {ctx.user.role === "Brand Admin" && d.decisions === 0 && <Btn v="s" onClick={async () => { try { await api.demoActivity(); await load(); toast("Sample activity added."); } catch (e) { toast(errMsg(e), true); } }}>Add sample activity</Btn>}</div>
         <Muted>Guideline-clarity score: a rule that creators often dispute may be unclear or wrong. Counts come from creator decisions ({d.decisions} so far).</Muted>
         <div className="overflow-x-auto"><table><thead><tr><th>Source</th><th>Category</th><th>Accepted or edited</th><th>Disputed</th><th>Dispute rate</th><th>Clarity score</th><th>Hint</th></tr></thead>
           <tbody>{d.clarity.map((c: any) => <tr key={c.src}><td className="font-semibold">{c.src}</td><td>{c.category}</td><td>{c.accepted}</td><td>{c.disputed}</td><td>{c.dispute_rate}%</td>

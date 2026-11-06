@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from .config import settings
 from .kit import load_kit, seed_demo_kit
-from .models import Comment, Document, Tenant, User
+from .models import Comment, Document, Finding, Tenant, User
 from .retrieval import index_kit
 from .security import hash_pw
 
@@ -34,8 +34,13 @@ def seed_workflow_examples(db: Session, tenant_id: str) -> None:
     from . import services as svc
     from .pipeline import current_findings, review_is_fresh, run_review
 
-    existing = set(db.execute(select(Document.title).where(
+    legacy_examples = db.execute(select(Document).where(
         Document.tenant_id == tenant_id, Document.title.like("[Demo Workflow] %")
+    )).scalars()
+    for doc in legacy_examples:
+        doc.title = doc.title.replace("[Demo Workflow] ", "[Lumora] ", 1)
+    existing = set(db.execute(select(Document.title).where(
+        Document.tenant_id == tenant_id, Document.title.like("[Lumora] %")
     )).scalars())
     aria = db.execute(select(User).where(User.email == "aria@lumora.demo")).scalars().first()
     meera = db.execute(select(User).where(User.email == "meera@lumora.demo")).scalars().first()
@@ -43,22 +48,22 @@ def seed_workflow_examples(db: Session, tenant_id: str) -> None:
         return
 
     examples = [
-        ("[Demo Workflow] Member welcome email", "Welcome to Lumora Wellness. Explore the class schedule and choose a session that works for you.", "pending_manager"),
-        ("[Demo Workflow] Monthly studio newsletter", "This month at Lumora Wellness: new class times, instructor introductions, and community events.", "changes_requested"),
-        ("[Demo Workflow] Class schedule announcement", "The updated class schedule is available. Members can review session times in the Lumora app.", "approved"),
-        ("[Demo Workflow] Community event invitation", "Join us for a community wellness afternoon with guided movement and time to connect.", "published"),
-        ("[Demo Workflow] New member onboarding", "Start with a short introduction to Lumora Wellness, our class options, and how members can plan their first visit.", "pending_manager"),
-        ("[Demo Workflow] Instructor spotlight", "Meet the instructors leading this month's movement and mindfulness sessions at Lumora Wellness.", "pending_manager"),
-        ("[Demo Workflow] App feature update", "The Lumora app now brings class times, saved sessions, and member updates together in one place.", "pending_manager"),
-        ("[Demo Workflow] Weekend open house", "Visit the Lumora studio this weekend to meet the team and learn about the community class schedule.", "changes_requested"),
-        ("[Demo Workflow] Mindful movement guide", "A simple guide to preparing for a mindful movement session, from comfortable clothing to taking breaks when needed.", "approved"),
-        ("[Demo Workflow] Seasonal class reminder", "Explore this season's class calendar and choose sessions that fit your routine.", "published"),
+        ("[Lumora] Member welcome email", "Welcome to Lumora Wellness. Explore the class schedule and choose a session that works for you.", "pending_manager"),
+        ("[Lumora] Monthly studio newsletter", "This month at Lumora Wellness: new class times, instructor introductions, and community events.", "changes_requested"),
+        ("[Lumora] Class schedule announcement", "The updated class schedule is available. Members can review session times in the Lumora app.", "approved"),
+        ("[Lumora] Community event invitation", "Join us for a community wellness afternoon with guided movement and time to connect.", "published"),
+        ("[Lumora] New member onboarding", "Start with a short introduction to Lumora Wellness, our class options, and how members can plan their first visit.", "pending_manager"),
+        ("[Lumora] Instructor spotlight", "Meet the instructors leading this month's movement and mindfulness sessions at Lumora Wellness.", "pending_manager"),
+        ("[Lumora] App feature update", "The Lumora app now brings class times, saved sessions, and member updates together in one place.", "pending_manager"),
+        ("[Lumora] Weekend open house", "Visit the Lumora studio this weekend to meet the team and learn about the community class schedule.", "changes_requested"),
+        ("[Lumora] Mindful movement guide", "A simple guide to preparing for a mindful movement session, from comfortable clothing to taking breaks when needed.", "approved"),
+        ("[Lumora] Seasonal class reminder", "Explore this season's class calendar and choose sessions that fit your routine.", "published"),
     ]
     for title, body, target in examples:
         if title in existing:
             continue
         doc = svc.create_doc(db, aria, title, body, aria.team, True)
-        svc.comment(db, aria, doc, "Demo brief: prepare this Lumora message for review using the approved brand kit.")
+        svc.comment(db, aria, doc, "Campaign brief: prepare this Lumora message for review using the approved brand kit.")
         run_review(db, doc, aria)
         _, findings = current_findings(db, doc)
         for finding in findings:
@@ -67,12 +72,12 @@ def seed_workflow_examples(db: Session, tenant_id: str) -> None:
             if finding.rep is not None:
                 svc.decide(db, aria, doc, finding.id, "accept")
             else:
-                svc.decide(db, aria, doc, finding.id, "dispute", reason="Demo example: reviewed against the approved brand source.")
+                svc.decide(db, aria, doc, finding.id, "dispute", reason="Sample review: checked against the approved brand source.")
         svc.submit(db, aria, doc)
         if doc.status == "pending_reviewer":
             leela = db.execute(select(User).where(User.email == "leela@lumora.demo")).scalars().first()
             if leela:
-                svc.reviewer_clear(db, leela, doc, "Demo review completed; forwarding to the Brand Manager.")
+                svc.reviewer_clear(db, leela, doc, "Legal review completed; forwarding to the Brand Manager.")
         if target == "changes_requested":
             svc.request_changes(db, meera, doc, "Please add the event date and registration details before approval.")
         elif target in ("approved", "published"):
@@ -82,11 +87,16 @@ def seed_workflow_examples(db: Session, tenant_id: str) -> None:
 
     # Complete any examples created by an earlier demo-seed version too.
     for doc in db.execute(select(Document).where(
-        Document.tenant_id == tenant_id, Document.title.like("[Demo Workflow] %")
+        Document.tenant_id == tenant_id, Document.title.like("[Lumora] %")
     )).scalars():
+        for comment in db.execute(select(Comment).where(Comment.doc_id == doc.id)).scalars():
+            comment.text = comment.text.replace("Demo brief", "Campaign brief").replace("Demo review completed", "Legal review completed")
+        for finding in db.execute(select(Finding).where(Finding.doc_id == doc.id)).scalars():
+            if finding.reason:
+                finding.reason = finding.reason.replace("Demo example", "Sample review")
         has_comment = db.execute(select(Comment.id).where(Comment.doc_id == doc.id).limit(1)).first()
         if not has_comment:
-            svc.comment(db, aria, doc, "Demo brief: prepare this Lumora message for review using the approved brand kit.")
+            svc.comment(db, aria, doc, "Campaign brief: prepare this Lumora message for review using the approved brand kit.")
         if doc.status == "draft":
             run, findings = current_findings(db, doc)
             if not review_is_fresh(doc, run):
@@ -98,12 +108,12 @@ def seed_workflow_examples(db: Session, tenant_id: str) -> None:
                 if finding.rep is not None:
                     svc.decide(db, aria, doc, finding.id, "accept")
                 else:
-                    svc.decide(db, aria, doc, finding.id, "dispute", reason="Demo example: reviewed against the approved brand source.")
+                    svc.decide(db, aria, doc, finding.id, "dispute", reason="Sample review: checked against the approved brand source.")
             svc.submit(db, aria, doc)
             if doc.status == "pending_reviewer":
                 leela = db.execute(select(User).where(User.email == "leela@lumora.demo")).scalars().first()
                 if leela:
-                    svc.reviewer_clear(db, leela, doc, "Demo review completed; forwarding to the Brand Manager.")
+                    svc.reviewer_clear(db, leela, doc, "Legal review completed; forwarding to the Brand Manager.")
     db.commit()
 
 

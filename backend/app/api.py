@@ -268,7 +268,11 @@ def doc_audit(doc_id: int, u: User = Depends(current_user), db: Session = Depend
 
 # ---------- audit ----------
 def audit_out(e: AuditEvent) -> dict:
-    return {"seq": e.seq, "at": e.at.isoformat(sep=" "), "user": e.user_name, "role": e.role, "action": e.action, "detail": e.detail,
+    # Keep legacy workspace-example labels friendly in the UI without modifying the
+    # append-only, hash-chained audit records stored on disk.
+    detail = e.detail.replace("[Demo Workflow]", "[Lumora]").replace("Demo brief", "Campaign brief")
+    detail = detail.replace("Demo review completed", "Legal review completed").replace("Demo example", "Sample review")
+    return {"seq": e.seq, "at": e.at.isoformat(sep=" "), "user": e.user_name, "role": e.role, "action": e.action, "detail": detail,
             "doc_id": e.doc_id, "hash": e.hash[:16]}
 
 

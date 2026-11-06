@@ -22,16 +22,16 @@ export default function Workflow({ ctx }: { ctx: Ctx }) {
   useEffect(() => { setOps(null); setNote(""); setA(1); setB("working"); }, [doc?.id]);
 
   if (!doc) {
-    const examples = ctx.docs.filter(d => d.title.startsWith("[Demo Workflow] "));
+    const examples = ctx.docs.filter(d => d.title.startsWith("[Lumora] "));
     return <Pane>
       <h2 className="text-[22px] mb-1">Approval and history</h2>
       <Muted>Select a document to see its approval status, comments, revision history, and audit trail.</Muted>
-      <h3 className="text-[17px] mt-5">Demo workflow examples</h3>
-      <Muted>Sample Lumora drafts show records at different approval stages. Open one to inspect its decisions and history.</Muted>
-      {!examples.length && <Muted>Demo workflow examples will appear here when demo data is enabled.</Muted>}
+      <h3 className="text-[17px] mt-5">Lumora drafts</h3>
+      <Muted>Open a prepared draft to inspect its content, approval status, comments, revisions, and audit trail.</Muted>
+      {!examples.length && <Muted>Workspace drafts will appear here when available.</Muted>}
       <div className="grid gap-2 mt-3">
         {examples.map(d => <div key={d.id} className="border border-ln rounded-md p-3 flex flex-wrap items-center justify-between gap-3">
-          <div><b>{d.title.replace("[Demo Workflow] ", "")}</b><div className="mt-1"><StatusPill status={d.status} label={d.status_label} /></div></div>
+          <div><b>{d.title.replace("[Lumora] ", "")}</b><div className="mt-1"><StatusPill status={d.status} label={d.status_label} /></div></div>
           <Btn v="s" onClick={() => void ctx.open(d.id, "flow")}>Open approval history</Btn>
         </div>)}
       </div>
