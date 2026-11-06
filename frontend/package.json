@@ -8,6 +8,9 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

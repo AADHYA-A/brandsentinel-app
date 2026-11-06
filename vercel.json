@@ -9,6 +9,7 @@
     "frontend": {
       "root": "frontend",
       "framework": "vite",
+      "installCommand": "env -u NPM_CONFIG_CACHE_DIR -u npm_config_cache_dir -u npm_config_cache-dir npm ci",
       "outputDirectory": "dist"
     }
   },
