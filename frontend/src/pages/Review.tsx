@@ -9,6 +9,20 @@ export const SAMPLE = `Hi everyone! Our Customers LOVE Lumora!! Over 10,000 clie
 <img src="hero.png"> <a href="/join">click here</a>
 Banner text: #9aa0a6 on #ffffff`;
 
+const EXTRA_DEMO_DRAFTS = [
+  { title: "Wellness week social caption", text: "Join Lumora for Wellness Week! We’re the best in the industry, and our classes guarantee a calmer you. Sign up today." },
+  { title: "Pro plan price announcement", text: "A better routine starts here. The Pro plan is now only ₹1,299 per month. Join today for the same trusted Lumora experience." },
+  { title: "Member welcome email", text: "Welcome to Lumora. Your membership is ready. Explore the class schedule, choose a session that suits you, and reach out if you need help getting started." },
+  { title: "Sleep campaign claim check", text: "Our clinically proven program helps members get 40% better sleep in just seven days. Try it now for guaranteed results." },
+  { title: "Social story call to action", text: "Ready to begin? <a href=\"/join\">Click here</a> to sign up for your first class. Our friendly instructors are ready to help." },
+  { title: "Influencer wellness caption", text: "Obviously, you’d be silly to miss Lumora’s world-class sessions. Our teachers are the #1 choice for everyone who wants to feel amazing." },
+  { title: "Partner introduction email", text: "Lumora is the only wellness app you need. Over 9,000 users trust us, and our method is guaranteed to work. We’d love to discuss a partnership." },
+  { title: "Limited-time offer notification", text: "LAST CHANCE!!! Join now for the cheapest classes in town. This unbeatable offer guarantees you’ll feel better immediately." },
+  { title: "Class booking FAQ", text: "How do I book a class? Open the schedule, choose a session, and select Book. You can review or cancel your booking from My Classes." },
+  { title: "Community event landing page", text: "Spend Saturday morning with the Lumora community. Join a guided stretch session, meet local members, and enjoy a relaxed start to the weekend." },
+  { title: "Project Aurora teaser", text: "Sneak peek: Project Aurora launches next quarter. The new experience brings guided routines and member check-ins into one place." },
+];
+
 export default function Review({ ctx }: { ctx: Ctx }) {
   const toast = useToast();
   const { doc, user } = ctx;
@@ -47,6 +61,19 @@ export default function Review({ ctx }: { ctx: Ctx }) {
               <Btn v="g" onClick={() => run(() => apply(api.createDoc({ title: "Untitled draft", text: "", team: user.team })))}>New draft</Btn>
               <Btn v="s" onClick={() => run(() => apply(api.createDoc({ title: "Sample launch post", text: SAMPLE, team: user.team })))}>Load sample draft</Btn>
             </div>
+            <details className="mt-3">
+              <summary className="cursor-pointer font-semibold">Browse 11 more demo drafts</summary>
+              <Muted>Choose a sample to create a draft in your workspace. It will not be submitted until you run the review and send it for approval.</Muted>
+              <div className="grid gap-2 mt-2 sm:grid-cols-2">
+                {EXTRA_DEMO_DRAFTS.map(sample => (
+                  <div key={sample.title} className="border border-ln rounded-md p-3">
+                    <b>{sample.title}</b>
+                    <p className="text-sm text-mut my-1">{sample.text}</p>
+                    <Btn v="s" onClick={() => run(() => apply(api.createDoc({ title: sample.title, text: sample.text, team: user.team })))}>Use this draft</Btn>
+                  </div>
+                ))}
+              </div>
+            </details>
           </>
         ) : <Muted>Open a document from the Documents tab to see its findings.</Muted>}
       </Pane>
