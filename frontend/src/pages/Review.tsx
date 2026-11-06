@@ -114,6 +114,16 @@ export default function Review({ ctx }: { ctx: Ctx }) {
             Upload file<input ref={fileRef} type="file" className="sr-only" accept=".txt,.md,.html,.htm,.docx,.pdf,.png,.jpg,.jpeg,.webp,.gif" onChange={e => upload(e.target.files?.[0])} /></label>}
           {user.role === "Creator" && <Btn v="s" onClick={() => { ctx.setDoc(null); }}>Close</Btn>}
         </div>
+        <details className="mt-3">
+          <summary className="cursor-pointer font-semibold">How to prepare and review a draft</summary>
+          <ol className="list-decimal pl-5 mt-2 grid gap-1 text-sm">
+            <li>Give the draft a short title that identifies its campaign or purpose.</li>
+            <li>Paste the exact copy you plan to publish, or upload a supported document or image.</li>
+            <li>For confidential content, open Options and turn on Local-only mode.</li>
+            <li>Select Run review to check the draft against approved brand sources.</li>
+            <li>Review the cited findings, resolve each one, then continue to approval.</li>
+          </ol>
+        </details>
         {editable && (
           <details className="mt-3">
             <summary className="cursor-pointer">Options for uploaded images and confidentiality</summary>
@@ -145,6 +155,16 @@ export default function Review({ ctx }: { ctx: Ctx }) {
             <option value="all">all</option><option value="open">open</option><option value="high">high-risk</option></select></label>
         </div>
         <Muted>Each finding shows the passage, why it was flagged, its approved source, and a suggested fix. Accept the fix, edit it, or dispute it with a reason. Resolve findings before continuing to approval.</Muted>
+        <details className="mb-2">
+          <summary className="cursor-pointer font-semibold">How to handle findings</summary>
+          <ol className="list-decimal pl-5 mt-2 grid gap-1 text-sm">
+            <li>Read the highlighted passage and the reason for the flag.</li>
+            <li>Check the cited guideline or approved fact.</li>
+            <li>Accept the suggested fix or edit the wording to keep your intent.</li>
+            <li>If the flag is wrong, dispute it and explain why or provide evidence.</li>
+            <li>After changing the draft, run the review again; decide every finding before approval.</li>
+          </ol>
+        </details>
         {!doc.run && <Muted>Choose “Run review” to check this draft. Every finding will cite an approved source.</Muted>}
         {doc.run && !fresh && <p className="bg-mdb text-md rounded p-2 my-2">{dirty ? "You have edited the draft. " : ""}Run the review again to see findings for the current text.</p>}
         {doc.run && fresh && (

@@ -47,6 +47,16 @@ export default function Workflow({ ctx }: { ctx: Ctx }) {
           {STEPS.map((s, i) => <li key={s} aria-current={i === AT[doc.status] ? "step" : undefined}
             className={`px-2.5 py-0.5 text-[13px] rounded border ${i === AT[doc.status] ? "bg-ink text-bg border-ink" : "border-ln"}`}>{s}</li>)}
         </ol>
+        <details className="mb-3">
+          <summary className="cursor-pointer font-semibold">How approval works</summary>
+          <ol className="list-decimal pl-5 mt-2 grid gap-1 text-sm">
+            <li>The Creator runs a review, resolves all findings, and submits the draft.</li>
+            <li>High-risk claims go to the Authorised Reviewer; other drafts go to the Brand Manager.</li>
+            <li>The Reviewer checks the evidence and either clears the claims for the Manager or requests changes with a note.</li>
+            <li>The Manager approves the draft or requests changes. Notes explain what needs to change.</li>
+            <li>After approval, mark it published. Comments, revisions, and the audit trail record the decisions.</li>
+          </ol>
+        </details>
 
         {user.role === "Creator" && (
           <>
@@ -101,7 +111,16 @@ export default function Workflow({ ctx }: { ctx: Ctx }) {
 
       <Pane>
         <h2 className="text-[22px] mb-1">Revision history</h2>
-        <Muted>Use Compare versions to see what changed between a saved version and the current draft. The audit trail below records who took each action and when.</Muted>
+        <details className="mb-2">
+          <summary className="cursor-pointer font-semibold">How to read revision history</summary>
+          <ol className="list-decimal pl-5 mt-2 grid gap-1 text-sm">
+            <li>Each saved version shows when it was created, who created it, and any note.</li>
+            <li>Open View text to inspect the full saved draft.</li>
+            <li>Choose a starting version under From.</li>
+            <li>Choose another saved version or current text under to, then select Show changes.</li>
+            <li>Use the audit trail below to see who took each action and when.</li>
+          </ol>
+        </details>
         {!doc.versions.length && <Muted>Submit a draft to create version 1.</Muted>}
         {doc.versions.map(v => (
           <div key={v.version} className="border border-ln rounded-md p-2.5 mt-2">
