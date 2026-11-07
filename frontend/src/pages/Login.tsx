@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api, setToken } from "../api";
 import type { User } from "../types";
 import { Btn, Input, Muted, Pane, errMsg } from "../ui";
@@ -10,9 +10,17 @@ export default function Login({ onLogin }: { onLogin: (u: User) => void }) {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
+  const [accounts, setAccounts] = useState<User[]>([]);
+  useEffect(() => { api.demoUsers().then(setAccounts).catch(() => setAccounts([])); }, []);
   const go = async (e: string, p: string) => {
     setErr("");
     try { const r = await api.login(e, p); setToken(r.token); onLogin(r.user); } catch (x) { setErr(errMsg(x)); }
+  };
+  const continueAs = (account: User) => {
+    const password = account.password || DEMO_PASSWORD;
+    setEmail(account.email);
+    setPw(password);
+    void go(account.email, password);
   };
   return (
     <main className="login-shell max-w-lg mx-auto px-5">
@@ -24,7 +32,7 @@ export default function Login({ onLogin }: { onLogin: (u: User) => void }) {
       <Muted className="mt-3">Pre-publication brand governance. Every finding cites an approved source; people make every decision.</Muted>
       <Pane className="login-card mt-6">
         <h2 className="text-xl mb-2">Sign in</h2>
-        <Muted>Sign in with your workspace account, or continue with Aria to explore the Lumora workspace.</Muted>
+        <Muted>Sign in with your workspace account, or choose a Lumora account below to explore a role.</Muted>
         <form onSubmit={e => { e.preventDefault(); go(email, pw); }} className="grid gap-3">
           <label className="grid gap-1">
             <span>Email address</span>
@@ -42,18 +50,16 @@ export default function Login({ onLogin }: { onLogin: (u: User) => void }) {
       </Pane>
       <Pane className="login-card mt-4">
         <h2 className="text-xl mb-1">Explore Lumora</h2>
-        <Muted>Continue with Aria’s Creator account to open a workspace with prepared drafts, brand guidance, and approval history.</Muted>
-        <button
-          type="button"
-          onClick={() => {
-            setEmail(DEMO_EMAIL);
-            setPw(DEMO_PASSWORD);
-            void go(DEMO_EMAIL, DEMO_PASSWORD);
-          }}
-          className="w-full mt-3 text-left border border-ln rounded-md px-3 py-2 cursor-pointer"
-        >
-          <b>Continue as Aria</b> <span className="text-mut">· Creator workspace</span>
-        </button>
+        <Muted>Choose a name to open the workspace with that role’s view and permissions.</Muted>
+        <div className="grid gap-2 mt-3 sm:grid-cols-2">
+          {(accounts.length ? accounts : [{ id: 0, name: "Aria Menon", email: DEMO_EMAIL, role: "Creator" as const, team: "Marketing", tenant: "lumora", password: DEMO_PASSWORD }]).map(account => (
+            <button key={account.id} type="button" onClick={() => continueAs(account)}
+              className="w-full text-left border border-ln rounded-xl px-3 py-3 cursor-pointer hover:border-ac hover:bg-acb">
+              <b className="block">{account.name}</b>
+              <span className="text-mut text-sm">{account.role} · {account.team}</span>
+            </button>
+          ))}
+        </div>
       </Pane>
       <p className="text-center text-xs text-mut mt-5">No source, no finding.</p>
       </div>
