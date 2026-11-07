@@ -85,6 +85,49 @@ def seed_workflow_examples(db: Session, tenant_id: str) -> None:
             if target == "published":
                 svc.publish(db, meera, doc)
 
+    # Give the second Creator a complete, repeatable Social workspace too. These
+    # records also populate the reviewer, manager, and admin views with examples
+    # at each workflow stage.
+    dev = db.execute(select(User).where(User.email == "dev@lumora.demo")).scalars().first()
+    leela = db.execute(select(User).where(User.email == "leela@lumora.demo")).scalars().first()
+    if dev and leela:
+        dev_examples = [
+            ("[Lumora] Social: Studio introduction reel", "Meet the Lumora team and explore our welcoming movement classes for every experience level.", "pending_reviewer"),
+            ("[Lumora] Social: Member story carousel", "Members share how they make room for movement and community in a routine that works for them.", "pending_reviewer"),
+            ("[Lumora] Social: Class booking reminder", "Browse the weekly schedule and reserve a class that fits your day.", "pending_manager"),
+            ("[Lumora] Social: Instructor Q&A", "Our instructors answer common questions about getting started, choosing a class, and taking breaks.", "pending_manager"),
+            ("[Lumora] Social: Spring open house post", "Join us for a welcoming studio open house. Check the event page for the date, schedule, and registration details.", "changes_requested"),
+            ("[Lumora] Social: App update announcement", "Find class schedules and saved sessions together in the Lumora app.", "changes_requested"),
+            ("[Lumora] Social: Community class recap", "Thank you to everyone who joined our community class and shared an afternoon of movement.", "approved"),
+            ("[Lumora] Social: Weekly schedule story", "This week's class schedule is ready. Explore the options and choose a session that works for you.", "approved"),
+            ("[Lumora] Social: Mindful movement tip", "Take a comfortable pace, listen to your body, and pause whenever you need during movement.", "published"),
+            ("[Lumora] Social: New member welcome post", "Welcome to the Lumora community. Start by exploring the class calendar and finding a session that feels right for you.", "published"),
+        ]
+        existing_dev = set(db.execute(select(Document.title).where(
+            Document.tenant_id == tenant_id, Document.creator_id == dev.id
+        )).scalars())
+        for title, body, target in dev_examples:
+            if title in existing_dev:
+                continue
+            doc = svc.create_doc(db, dev, title, body, dev.team, True)
+            svc.comment(db, dev, doc, "Social brief: prepare this Lumora message for review using the approved brand kit.")
+            run_review(db, doc, dev)
+            _, findings = current_findings(db, doc)
+            for finding in findings:
+                if finding.rep is not None:
+                    svc.decide(db, dev, doc, finding.id, "accept")
+                else:
+                    svc.decide(db, dev, doc, finding.id, "dispute", reason="Sample review: checked against the approved brand source.")
+            svc.submit(db, dev, doc)
+            if doc.status == "pending_reviewer" and target != "pending_reviewer":
+                svc.reviewer_clear(db, leela, doc, "Legal review completed; forwarding to the Brand Manager.")
+            if target == "changes_requested":
+                svc.request_changes(db, meera, doc, "Please confirm the event details and link before publication.")
+            elif target in ("approved", "published"):
+                svc.approve(db, meera, doc, "Reviewed against the Lumora brand kit.")
+                if target == "published":
+                    svc.publish(db, meera, doc)
+
     # Complete any examples created by an earlier demo-seed version too.
     for doc in db.execute(select(Document).where(
         Document.tenant_id == tenant_id, Document.title.like("[Lumora] %")

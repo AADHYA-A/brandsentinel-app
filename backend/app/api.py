@@ -2,12 +2,16 @@ from __future__ import annotations
 import csv
 import io
 import json
+import re
+import time
+from collections import defaultdict, deque
 from datetime import date
 from typing import Optional
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import PlainTextResponse, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from . import audit, insights, services as svc, storage
 from .ai import get_provider
@@ -19,7 +23,7 @@ from .models import AIUsage, AuditEvent, Comment, DocVersion, Document, Finding,
 from .parser import IMG_EXT, parse_bytes, sanitise
 from .pipeline import current_findings, review_is_fresh, run_review
 from .retrieval import index_kit
-from .security import check_pw, current_user, make_token, rate_limit, require
+from .security import check_pw, current_user, hash_pw, make_token, rate_limit, require
 
 r = APIRouter(prefix="/api")
 
@@ -28,6 +32,16 @@ r = APIRouter(prefix="/api")
 class LoginIn(BaseModel):
     email: str
     password: str
+
+
+class SignupIn(BaseModel):
+    name: str = Field(min_length=2, max_length=120)
+    email: str = Field(min_length=3, max_length=200)
+    team: str = Field(default="Marketing", max_length=80)
+    password: str = Field(min_length=10, max_length=128)
+
+
+_signup_hits: dict[str, deque[float]] = defaultdict(deque)
 
 
 def user_out(u: User) -> dict:
@@ -44,11 +58,51 @@ def login(b: LoginIn, db: Session = Depends(get_db)):
     return {"token": make_token(u), "user": user_out(u)}
 
 
+@r.post("/auth/signup")
+def signup(b: SignupIn, request: Request, db: Session = Depends(get_db)):
+    if not settings.dev_login or settings.oidc_issuer:
+        raise HTTPException(404, "Account creation is disabled for this sign-in method.")
+    email = b.email.strip().lower()
+    name = b.name.strip()
+    if len(name) < 2:
+        raise HTTPException(422, "Enter your name (at least 2 characters).")
+    if len(b.password.encode("utf-8")) > 72:
+        raise HTTPException(422, "Password must be 72 UTF-8 bytes or fewer.")
+    if not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+        raise HTTPException(422, "Enter a valid email address.")
+    # Limit account creation attempts per client IP to reduce automated abuse.
+    ip = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+    hits = _signup_hits[ip]
+    while hits and now - hits[0] > 900:
+        hits.popleft()
+    if len(hits) >= 5:
+        raise HTTPException(429, "Too many sign-up attempts. Try again later.")
+    hits.append(now)
+    if db.execute(select(User.id).where(User.email == email)).first():
+        raise HTTPException(409, "An account with this email already exists. Sign in instead.")
+
+    user = User(tenant_id=settings.default_tenant, name=name, email=email,
+                role="Creator", team=b.team.strip() or "Marketing", password_hash=hash_pw(b.password))
+    db.add(user)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(409, "An account with this email already exists. Sign in instead.")
+    db.refresh(user)
+    return {"token": make_token(user), "user": user_out(user)}
+
+
 @r.get("/auth/demo-users")
 def demo_users(db: Session = Depends(get_db)):
     if not (settings.dev_login and settings.seed_demo):
         return []
-    return [dict(user_out(u), password=settings.demo_password) for u in db.execute(select(User).order_by(User.id)).scalars()]
+    # Only seeded examples share the known demo password. User-created accounts
+    # must sign in with their own chosen password instead.
+    return [dict(user_out(u), password=settings.demo_password) for u in db.execute(
+        select(User).where(User.email.like("%@lumora.demo")).order_by(User.id)
+    ).scalars()]
 
 
 @r.get("/auth/me")

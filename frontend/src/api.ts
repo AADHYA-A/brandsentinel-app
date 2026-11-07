@@ -28,6 +28,7 @@ const post = <T,>(p: string, b: unknown = {}) => req<T>("POST", p, b);
 
 export const api = {
   login: (email: string, password: string) => post<{ token: string; user: User }>("/auth/login", { email, password }),
+  signup: (b: { name: string; email: string; team: string; password: string }) => post<{ token: string; user: User }>("/auth/signup", b),
   demoUsers: () => get<User[]>("/auth/demo-users"),
   me: () => get<User>("/auth/me"),
   disclosure: () => get<{ ai_configured: boolean; model: string | null; tenant_local_only: boolean; text: string; storage: string }>("/disclosure"),
